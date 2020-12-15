@@ -44,7 +44,7 @@ export default class ProjectTools {
     const linter = userOptions.linter || Linter.EsLint;
     const projectType = ProjectType.Application;
     //const name = toFileName(userOptions.name);
-    const projectDirectory = userOptions.directory;
+    const projectDirectory = userOptions.directory || '';
     // ? `${toFileName(userOptions.directory)}/${name}`
     // : name;
     const projectName = projectDirectory.replace(new RegExp('/', 'g'), '-');
