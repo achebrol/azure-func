@@ -103,29 +103,6 @@ export default class ProjectTools {
     return this.createCommand(commands);
   }
 
-  getDeployConfig(options = this.options) {
-    const expr = this.options.trigger;
-    const commands = [];
-    switch (expr) {
-      case '--trigger-http':
-        commands.push({
-          command: `gcloud functions deploy ${options.propertyName} ${options.trigger} --runtime ${options.runtime} --region ${options.region} --env-vars-file ./dist/apps/${options.name}/.production.yaml --source ./dist/apps/${options.name} --max-instances ${options.maxInstances} --allow-unauthenticated`
-        });
-        break;
-      case '--trigger-topic': {
-        const topic = options.triggerTopic.length
-          ? options.triggerTopic
-          : options.propertyName;
-        commands.push({
-          command: `gcloud functions deploy ${options.propertyName} ${options.trigger} ${topic} --runtime ${options.runtime} --region ${options.region} --env-vars-file ./dist/apps/${options.name}/.production.yaml --source ./dist/apps/${options.name} --max-instances ${options.maxInstances} --allow-unauthenticated`
-        });
-        break;
-      }
-    }
-
-    return this.createCommand(commands);
-  }
-
   getTestConfig(options = this.options) {
     return {
       builder: '@nrwl/jest:jest',
@@ -212,18 +189,42 @@ export default class ProjectTools {
       addPackageJsonDependency(host, {
         type: NodeDependencyType.Default,
         name: '@azure/functions',
-        version: '^1.2.0',
+        version: '*',
         overwrite: true
       });
-      /*
+      addPackageJsonDependency(host, {
+        type: NodeDependencyType.Dev,
+        name: 'copyfiles',
+        version: '*',
+        overwrite: true
+      });
+
       if (options.includeApollo) {
         addPackageJsonDependency(host, {
           type: NodeDependencyType.Default,
           name: 'apollo-server-azure-functions',
-          version: '^2.19.0',
+          version: '*',
           overwrite: true
         });
-      }*/
+        addPackageJsonDependency(host, {
+          type: NodeDependencyType.Default,
+          name: 'graphql-middleware',
+          version: '*',
+          overwrite: true
+        });
+        addPackageJsonDependency(host, {
+          type: NodeDependencyType.Default,
+          name: 'graphql-shield',
+          version: '*',
+          overwrite: true
+        });
+        addPackageJsonDependency(host, {
+          type: NodeDependencyType.Default,
+          name: 'jsonwebtoken',
+          version: '*',
+          overwrite: true
+        });
+      }
       addPackageJsonDependency(host, {
         type: NodeDependencyType.Dev,
         name: 'copyfiles',
@@ -272,10 +273,7 @@ export default class ProjectTools {
       //Update /.vscode/settings.json
       const settingsPath = '/.vscode/settings.json';
       buffer = host.read(settingsPath);
-      if (buffer === null) {
-        throw new SchematicsException('Could not find /.vscode/settings.json');
-      }
-      const settings = JSON.parse(buffer.toString());
+      const settings = JSON.parse(buffer != null ? buffer.toString() : '{}');
       settings['azureFunctions.projectLanguage'] = 'TypeScript';
       settings['azureFunctions.projectRuntime'] = '~3';
       settings['debug.internalConsoleOptions'] = 'neverOpen';
@@ -283,10 +281,18 @@ export default class ProjectTools {
       //Update /.vscode/tasks.json
       const tasksPath = '/.vscode/tasks.json';
       buffer = host.read(tasksPath);
-      if (buffer === null) {
-        throw new SchematicsException('Could not find /.vscode/tasks.json');
+      const tasks = parse(
+        buffer != null
+          ? buffer.toString()
+          : `
+      {
+        // See https://go.microsoft.com/fwlink/?LinkId=733558
+        // for the documentation about the tasks.json format
+        "version": "2.0.0",
+        "tasks": []
       }
-      const tasks = parse(buffer.toString());
+      `
+      );
       (tasks.tasks as [unknown]).push(
         {
           type: 'func',
@@ -324,10 +330,16 @@ export default class ProjectTools {
       //Update /.vscode/launch.json
       const launchPath = '/.vscode/launch.json';
       buffer = host.read(launchPath);
-      if (buffer === null) {
-        throw new SchematicsException('Could not find /.vscode/launch.json');
+      const launch = JSON.parse(
+        buffer != null
+          ? buffer.toString()
+          : `
+      {
+        "version": "0.2.0",
+        "configurations": []
       }
-      const launch = JSON.parse(buffer.toString());
+      `
+      );
       launch.configurations.push({
         name: `${options.projectDirectory}-${options.projectName}`,
         type: 'node',

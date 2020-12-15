@@ -1,23 +1,19 @@
-import { Path } from "@angular-devkit/core";
-import { Linter } from "@nrwl/workspace";
+import { Path } from '@angular-devkit/core';
+import { Linter } from '@nrwl/workspace';
 
 export interface UserOptions {
   name: string;
-  prefix?: string;
-  trigger?: string;
-  maxInstances?: number;
-  runtime?: string;
-  region?: string;
   tags?: string;
+  includeApollo?: boolean;
   directory?: string;
   skipFormat: boolean;
   skipPackageJson?: boolean;
-  unitTestRunner?: "jest" | "none";
+  unitTestRunner?: 'jest' | 'none';
   linter?: Linter.EsLint;
   nxVersion?: string;
 }
 interface Options extends UserOptions {
-  triggerTopic? : string
+  triggerTopic?: string;
   appProjectRoot: Path;
   dot: string;
   projectName: string;

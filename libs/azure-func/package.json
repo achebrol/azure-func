@@ -11,7 +11,8 @@
   "schematics": "./collection.json",
   "builders": "./builders.json",
   "peerDependencies": {
-    "@nrwl/workspace": "*"
+    "@nrwl/workspace": "*",
+    "@schematics/angular": "*"
   },
   "dependencies": {
     "supertest": "^4.0.2",

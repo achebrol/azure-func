@@ -14,6 +14,7 @@ import updateNxJson from '../utilities/updateNxJson';
 // noinspection JSUnusedGlobalSymbols
 export default function(_UserOptions: UserOptions): Rule {
   return (tree: Tree, context: SchematicContext) => {
+    _UserOptions.includeApollo = false;
     const tools = new ProjectTools(_UserOptions, context);
     const options = tools.options;
     tools.log('Start template creation');
@@ -23,16 +24,18 @@ export default function(_UserOptions: UserOptions): Rule {
         name: options.projectName,
         directory: options.projectDirectory,
         skipFormat: true,
-        skipPackageJson: true,
+        skipPackageJson: false,
+
         tags: options.name,
         unitTestRunner: 'jest'
       }),
-      addPackageWithInit('@azure/functions'),
-      addPackageWithInit('copyfiles'),
-      formatFiles(options),
+      //addPackageWithInit('@azure/functions'),
+      //addPackageWithInit('copyfiles'),
       generateFiles(options),
       updateNxJson(options),
-      tools.updateWorkspaceJson(options)
+      tools.updateWorkspaceJson(options),
+      tools.addDependenciesAndScripts(options),
+      formatFiles(options)
     ])(tree, context);
   };
 }

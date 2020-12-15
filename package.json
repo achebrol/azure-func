@@ -2,6 +2,7 @@
   "name": "techops",
   "version": "0.0.0",
   "license": "MIT",
+  "schematics": "./libs/azure-func/collection.json",
   "scripts": {
     "nx": "nx",
     "start": "nx serve",
