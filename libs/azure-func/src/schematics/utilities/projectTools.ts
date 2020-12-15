@@ -91,13 +91,19 @@ export default class ProjectTools {
   getServeConfig(options = this.options) {
     const commands = [
       {
-        command: `nx build ${options.projectDirectory}-${options.projectName}`
+        command: options.projectDirectory
+          ? `nx build ${options.projectDirectory}-${options.projectName}`
+          : `nx build ${options.projectName}`
       },
       {
-        command: `copyfiles -f ./apps/${options.projectDirectory}/${options.projectName}/src/app/local.settings.json ./dist/apps/${options.projectDirectory}/${options.projectName}/`
+        command: options.projectDirectory
+          ? `copyfiles -f ./apps/${options.projectDirectory}/${options.projectName}/src/app/local.settings.json ./dist/apps/${options.projectDirectory}/${options.projectName}/`
+          : `copyfiles -f ./apps/${options.projectName}/src/app/local.settings.json ./dist/apps/${options.projectName}/`
       },
       {
-        command: `func start --script-root dist/apps/${options.projectDirectory}/${options.projectName} --typescript`
+        command: options.projectDirectory
+          ? `func start --script-root dist/apps/${options.projectDirectory}/${options.projectName} --typescript`
+          : `func start --script-root dist/apps/${options.projectName} --typescript`
       }
     ];
     return this.createCommand(commands);
@@ -126,18 +132,26 @@ export default class ProjectTools {
         assets: [
           {
             glob: '**/host.json',
-            input: `apps/${options.projectDirectory}/${options.projectName}/src/app`,
+            input: options.projectDirectory
+              ? `apps/${options.projectDirectory}/${options.projectName}/src/app`
+              : `apps/${options.projectName}/src/app`,
             output: '.'
           },
           {
             glob: '**/.funcignore',
-            input: `apps/${options.projectDirectory}/${options.projectName}/src/app`,
+            input: options.projectDirectory
+              ? `apps/${options.projectDirectory}/${options.projectName}/src/app`
+              : `apps/${options.projectName}/src/app`,
             output: '.'
           },
-          `apps/${options.projectDirectory}/${options.projectName}/src/assets`,
+          options.projectDirectory
+            ? `apps/${options.projectDirectory}/${options.projectName}/src/assets`
+            : `apps/${options.projectName}/src/assets`,
           {
             glob: '**/function.json',
-            input: `apps/${options.projectDirectory}/${options.projectName}/src/app`,
+            input: options.projectDirectory
+              ? `apps/${options.projectDirectory}/${options.projectName}/src/app`
+              : `apps/${options.projectName}/src/app`,
             output: '.'
           }
         ]
@@ -149,8 +163,12 @@ export default class ProjectTools {
           inspect: false,
           fileReplacements: [
             {
-              replace: `apps/${options.projectDirectory}/${options.projectName}/src/environments/environment.ts`,
-              with: `apps/${options.projectDirectory}/${options.projectName}/src/environments/environment.prod.ts`
+              replace: options.projectDirectory
+                ? `apps/${options.projectDirectory}/${options.projectName}/src/environments/environment.ts`
+                : `apps/${options.projectName}/src/environments/environment.ts`,
+              with: options.projectDirectory
+                ? `apps/${options.projectDirectory}/${options.projectName}/src/environments/environment.prod.ts`
+                : `apps/${options.projectName}/src/environments/environment.prod.ts`
             }
           ]
         }
@@ -238,18 +256,24 @@ export default class ProjectTools {
       }
 
       const pkg = JSON.parse(buffer.toString());
+      let projectFullName = options.projectName;
+      if (options.projectDirectory) {
+        projectFullName = `${options.projectDirectory}-${options.projectName}`;
+      }
       pkg.scripts[
-        `${options.projectDirectory}-${options.projectName}:serve`
-      ] = `nx run ${options.projectDirectory}-${options.projectName}:serve`;
+        `${projectFullName}:serve`
+      ] = `nx run ${projectFullName}:serve`;
       pkg.scripts[
-        `${options.projectDirectory}-${options.projectName}:build`
-      ] = `nx run ${options.projectDirectory}-${options.projectName}:build`;
+        `${projectFullName}:build`
+      ] = `nx run ${projectFullName}:build`;
       pkg.scripts[
-        `${options.projectDirectory}-${options.projectName}:build:deploy`
-      ] = `yarn run ${options.projectDirectory}:build && yarn run artifact:build ${options.projectDirectory}-${options.projectName}`;
-      pkg.scripts[
-        `${options.projectDirectory}-${options.projectName}:copy:localsettings`
-      ] = `copyfiles -f ./apps/${options.projectDirectory}/${options.projectName}/src/app/local.settings.json ./dist/apps/${options.projectDirectory}/${options.projectName}/`;
+        `${projectFullName}:build:deploy`
+      ] = `yarn run ${projectFullName}:build && yarn run artifact:build ${projectFullName}`;
+      pkg.scripts[`${projectFullName}:copy:localsettings`] = `copyfiles -f ${
+        options.projectRoot
+      }/${options.projectName}/src/app/local.settings.json ./dist/apps/${
+        options.projectDirectory ? options.projectDirectory + '/' : ''
+      }${options.projectName}/`;
 
       host.overwrite(pkgPath, JSON.stringify(pkg, null, 2));
 
@@ -305,25 +329,24 @@ export default class ProjectTools {
           label: `${options.projectDirectory}-${options.projectName} host start`,
           problemMatcher: '$func-node-watch',
           isBackground: true,
-          dependsOn: `copy ${options.projectDirectory}-${options.projectName} local.settings.json`,
+          dependsOn: `copy ${projectFullName} local.settings.json`,
           options: {
             cwd:
-              '${workspaceFolder}/dist/apps/' +
-              options.projectDirectory +
-              '/' +
-              options.projectName
+              '${workspaceFolder}/dist/apps/' + options.projectDirectory
+                ? options.projectDirectory + '/' + options.projectName
+                : options.projectName
           }
         },
         {
           type: 'shell',
-          label: `copy ${options.projectDirectory}-${options.projectName} local.settings.json`,
-          command: `yarn run ${options.projectDirectory}-${options.projectName}:copy:localsettings`,
-          dependsOn: `${options.projectDirectory}-${options.projectName}:build`
+          label: `copy ${projectFullName} local.settings.json`,
+          command: `yarn run ${projectFullName}:copy:localsettings`,
+          dependsOn: `${projectFullName}:build`
         },
         {
           type: 'shell',
-          label: `${options.projectDirectory}-${options.projectName}:build`,
-          command: `yarn run ${options.projectDirectory}-${options.projectName}:build`,
+          label: `${projectFullName}:build`,
+          command: `yarn run ${projectFullName}:build`,
           problemMatcher: [],
           group: {
             kind: 'build',
@@ -348,11 +371,11 @@ export default class ProjectTools {
       buffer = host.read(launchPath);
       const launch = JSON.parse(buffer.toString());
       launch.configurations.push({
-        name: `${options.projectDirectory}-${options.projectName}`,
+        name: `${projectFullName}`,
         type: 'node',
         request: 'attach',
         port: 9229,
-        preLaunchTask: `${options.projectDirectory}-${options.projectName} host start`
+        preLaunchTask: `${projectFullName} host start`
       });
       host.overwrite(launchPath, JSON.stringify(launch, null, 2));
 
