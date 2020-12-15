@@ -272,27 +272,32 @@ export default class ProjectTools {
 
       //Update /.vscode/settings.json
       const settingsPath = '/.vscode/settings.json';
+      if (!host.exists(settingsPath)) {
+        host.create(settingsPath, '{}');
+      }
       buffer = host.read(settingsPath);
-      const settings = JSON.parse(buffer != null ? buffer.toString() : '{}');
+      const settings = JSON.parse(buffer.toString());
       settings['azureFunctions.projectLanguage'] = 'TypeScript';
       settings['azureFunctions.projectRuntime'] = '~3';
       settings['debug.internalConsoleOptions'] = 'neverOpen';
       host.overwrite(settingsPath, JSON.stringify(settings, null, 2));
       //Update /.vscode/tasks.json
       const tasksPath = '/.vscode/tasks.json';
-      buffer = host.read(tasksPath);
-      const tasks = parse(
-        buffer != null
-          ? buffer.toString()
-          : `
-      {
-        // See https://go.microsoft.com/fwlink/?LinkId=733558
-        // for the documentation about the tasks.json format
-        "version": "2.0.0",
-        "tasks": []
+      if (!host.exists(tasksPath)) {
+        host.create(
+          tasksPath,
+          `
+        {
+          // See https://go.microsoft.com/fwlink/?LinkId=733558
+          // for the documentation about the tasks.json format
+          "version": "2.0.0",
+          "tasks": []
+        }
+        `
+        );
       }
-      `
-      );
+      buffer = host.read(tasksPath);
+      const tasks = parse(buffer.toString());
       (tasks.tasks as [unknown]).push(
         {
           type: 'func',
@@ -329,17 +334,19 @@ export default class ProjectTools {
       host.overwrite(tasksPath, stringify(tasks, null, 2));
       //Update /.vscode/launch.json
       const launchPath = '/.vscode/launch.json';
-      buffer = host.read(launchPath);
-      const launch = JSON.parse(
-        buffer != null
-          ? buffer.toString()
-          : `
-      {
-        "version": "0.2.0",
-        "configurations": []
+      if (!host.exists(launchPath)) {
+        host.create(
+          launchPath,
+          `
+        {
+          "version": "0.2.0",
+          "configurations": []
+        }
+        `
+        );
       }
-      `
-      );
+      buffer = host.read(launchPath);
+      const launch = JSON.parse(buffer.toString());
       launch.configurations.push({
         name: `${options.projectDirectory}-${options.projectName}`,
         type: 'node',
