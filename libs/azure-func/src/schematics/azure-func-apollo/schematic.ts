@@ -1,5 +1,6 @@
 import {
   chain,
+  externalSchematic,
   Rule,
   SchematicContext,
   Tree
@@ -11,16 +12,26 @@ import generateFiles from '../utilities/generateFiles';
 import updateNxJson from '../utilities/updateNxJson';
 
 // noinspection JSUnusedGlobalSymbols
-export default function(UserOptions: UserOptions): Rule {
+export default function(_UserOptions: UserOptions): Rule {
   return (tree: Tree, context: SchematicContext) => {
-    const tools = new ProjectTools(UserOptions, context);
+    const tools = new ProjectTools(_UserOptions, context);
     const options = tools.options;
     tools.log('Start template creation');
 
     return chain([
-      addPackageWithInit('@nrwl/jest'),
+      externalSchematic('@nrwl/node', 'application', {
+        name: options.projectName,
+        directory: options.projectDirectory,
+        skipFormat: true,
+        skipPackageJson: true,
+        tags: options.name,
+        unitTestRunner: 'jest'
+      }),
       addPackageWithInit('@azure/functions'),
       addPackageWithInit('apollo-server-azure-functions'),
+      addPackageWithInit('graphql-middleware'),
+      addPackageWithInit('graphql-shield'),
+      addPackageWithInit('jsonwebtoken'),
       addPackageWithInit('copyfiles'),
       formatFiles(options),
       generateFiles(options),

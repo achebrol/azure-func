@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "id": "GcpFunction",
+  "id": "azure-func",
   "title": "",
   "type": "object",
   "properties": {
@@ -13,40 +13,7 @@
       },
       "x-prompt": "What name would you like to use?"
     },
-    "prefix": {
-      "description": "Cloud Function trigger",
-      "default": "dev",
-      "type": "string",
-      "minLength": 1,
-      "x-prompt": "What function prefix would you like to you?"
-    },
-    "trigger": {
-      "description": "Cloud Function trigger",
-      "default": "--trigger-http",
-      "type": "string"
-    },
-    "runtime": {
-      "description": "Cloud Function runtime",
-      "default": "nodejs10",
-      "type": "string",
-      "minLength": 1,
-      "x-prompt": "Which runtime would you like to use?"
-    },
-    "maxInstances": {
-      "description": "Maximum instance of cloud functions",
-      "default": 10,
-      "type": "number",
-      "minLength": 1,
-      "x-prompt": "What's the maximal quantity of instances?"
-    },
-    "region": {
-      "description": "Cloud Function region",
-      "enum": ["us-central1", "us-east1", "us-east4","europe-west1", "europe-west2","asia-east2", "asia-northeast1","europe-west3"],
-      "default": "us-central1",
-      "type": "string",
-      "minLength": 1,
-      "x-prompt": "Where should the function be hosted?"
-    },
+
     "tags": {
       "type": "string",
       "description": "Add tags to the project (used for linting)",
@@ -60,11 +27,11 @@
     "skipFormat": {
       "description": "Skip formatting files",
       "type": "boolean",
-      "default": false
+      "default": true
     },
     "skipPackageJson": {
       "type": "boolean",
-      "default": false,
+      "default": true,
       "description": "Do not add dependencies to package.json."
     },
     "linter": {

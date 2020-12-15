@@ -1,12 +1,13 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "id": "GcpFunction",
+  "id": "azure-func",
   "title": "",
   "type": "object",
   "properties": {
     "name": {
       "type": "string",
       "description": "",
+      "default": "graphql",
       "$default": {
         "$source": "argv",
         "index": 0
@@ -48,7 +49,16 @@
     },
     "region": {
       "description": "Cloud Function region",
-      "enum": ["us-central1", "us-east1", "us-east4","europe-west1", "europe-west2","asia-east2", "asia-northeast1","europe-west3"],
+      "enum": [
+        "us-central1",
+        "us-east1",
+        "us-east4",
+        "europe-west1",
+        "europe-west2",
+        "asia-east2",
+        "asia-northeast1",
+        "europe-west3"
+      ],
       "default": "us-central1",
       "type": "string",
       "minLength": 1,

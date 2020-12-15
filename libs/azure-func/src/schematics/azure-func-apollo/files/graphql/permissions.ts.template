@@ -1,0 +1,21 @@
+import { rule, shield } from 'graphql-shield';
+const isAuthenticated = rule({ cache: 'no_cache' })(
+  (_parent, _args, { user }: { user: { [key: string]: any } }) => {
+    return !!user;
+  }
+);
+export const permissions = shield(
+  {
+    Query: {
+      queryItems: isAuthenticated,
+    },
+    Mutation: {
+      saveItem: isAuthenticated,
+      deleteItem: isAuthenticated,
+    },
+  },
+  {
+    allowExternalErrors: true,
+    debug: false,
+  }
+);

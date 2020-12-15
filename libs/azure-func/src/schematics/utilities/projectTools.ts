@@ -1,7 +1,11 @@
 import { Options, UserOptions } from '../schema';
 import { join, normalize } from '@angular-devkit/core';
 import { inspect } from 'util';
-import { Rule } from '@angular-devkit/schematics';
+import { Rule, SchematicsException, Tree } from '@angular-devkit/schematics';
+import {
+  addPackageJsonDependency,
+  NodeDependencyType
+} from '@schematics/angular/utility/dependencies';
 import {
   generateProjectLint,
   Linter,
@@ -13,12 +17,13 @@ import {
   toPropertyName,
   updateWorkspaceInTree
 } from '@nrwl/workspace';
+import { parse, stringify } from 'comment-json';
 
 export default class ProjectTools {
   userOptions: UserOptions;
   options: Options;
-  project: any;
-  context: any;
+  project;
+  context;
 
   constructor(userOptions, context) {
     this.context = context;
@@ -30,7 +35,7 @@ export default class ProjectTools {
       projectType: 'application',
       prefix: this.options.name,
       schematics: {},
-      architect: <any>{}
+      architect: {}
     };
     return this;
   }
@@ -86,7 +91,13 @@ export default class ProjectTools {
   getServeConfig(options = this.options) {
     const commands = [
       {
-        command: `npx @google-cloud/functions-framework --target ${options.propertyName} --source ./dist/apps/${options.name}`
+        command: `nx build ${options.projectDirectory}-${options.projectName}`
+      },
+      {
+        command: `copyfiles -f ./apps/${options.projectDirectory}/${options.projectName}/src/app/local.settings.json ./dist/apps/${options.projectDirectory}/${options.projectName}/`
+      },
+      {
+        command: `func start --script-root dist/apps/${options.projectDirectory}/${options.projectName} --typescript`
       }
     ];
     return this.createCommand(commands);
@@ -94,14 +105,14 @@ export default class ProjectTools {
 
   getDeployConfig(options = this.options) {
     const expr = this.options.trigger;
-    let commands = [];
+    const commands = [];
     switch (expr) {
       case '--trigger-http':
         commands.push({
           command: `gcloud functions deploy ${options.propertyName} ${options.trigger} --runtime ${options.runtime} --region ${options.region} --env-vars-file ./dist/apps/${options.name}/.production.yaml --source ./dist/apps/${options.name} --max-instances ${options.maxInstances} --allow-unauthenticated`
         });
         break;
-      case '--trigger-topic':
+      case '--trigger-topic': {
         const topic = options.triggerTopic.length
           ? options.triggerTopic
           : options.propertyName;
@@ -109,6 +120,7 @@ export default class ProjectTools {
           command: `gcloud functions deploy ${options.propertyName} ${options.trigger} ${topic} --runtime ${options.runtime} --region ${options.region} --env-vars-file ./dist/apps/${options.name}/.production.yaml --source ./dist/apps/${options.name} --max-instances ${options.maxInstances} --allow-unauthenticated`
         });
         break;
+      }
     }
 
     return this.createCommand(commands);
@@ -127,19 +139,43 @@ export default class ProjectTools {
 
   getBuildConfig(project = this.project, options = this.options) {
     return {
-      builder: '@joelcode/azure-func:build',
+      builder: '@nrwl/node:build',
       options: {
         outputPath: join(normalize('dist'), options.appProjectRoot),
         main: join(project.sourceRoot, 'index.ts'),
         yamlConfig: join(project.sourceRoot, '/environments/.production.yaml'),
         tsConfig: join(options.appProjectRoot, 'tsconfig.app.json'),
-        packageJson: join(options.appProjectRoot, 'package.json')
+        packageJson: join(options.appProjectRoot, 'package.json'),
+        assets: [
+          {
+            glob: '**/host.json',
+            input: `apps/${options.projectDirectory}/${options.projectName}/src/app`,
+            output: '.'
+          },
+          {
+            glob: '**/.funcignore',
+            input: `apps/${options.projectDirectory}/${options.projectName}/src/app`,
+            output: '.'
+          },
+          `apps/${options.projectDirectory}/${options.projectName}/src/assets`,
+          {
+            glob: '**/function.json',
+            input: `apps/${options.projectDirectory}/${options.projectName}/src/app`,
+            output: '.'
+          }
+        ]
       },
       configurations: {
         production: {
           optimization: true,
           extractLicenses: true,
-          inspect: false
+          inspect: false,
+          fileReplacements: [
+            {
+              replace: `apps/${options.projectDirectory}/${options.projectName}/src/environments/environment.ts`,
+              with: `apps/${options.projectDirectory}/${options.projectName}/src/environments/environment.prod.ts`
+            }
+          ]
         }
       }
     };
@@ -154,28 +190,155 @@ export default class ProjectTools {
   }
 
   getProjectArchitect() {
-    const expr = this.options.trigger;
-    switch (expr) {
-      case '--trigger-http':
-        this.project.architect.serve = this.getServeConfig();
-        break;
-      case '--trigger-topic':
-        break;
-    }
+    this.project.architect.serve = this.getServeConfig();
     this.project.architect.lint = this.getLintConfig();
     this.project.architect.test = this.getTestConfig();
     this.project.architect.build = this.getBuildConfig();
-    this.project.architect.deploy = this.getDeployConfig();
+    //this.project.architect.deploy = this.getDeployConfig();
     return this.project;
   }
 
-  updateWorkspaceJson(options): Rule {
+  updateWorkspaceJson(options: Options): Rule {
     return updateWorkspaceInTree(workspaceJson => {
       workspaceJson.projects[options.name] = this.getProjectArchitect();
       workspaceJson.defaultProject =
         workspaceJson.defaultProject || options.name;
       return workspaceJson;
     });
+  }
+
+  addDependenciesAndScripts(options: Options): Rule {
+    return (host: Tree) => {
+      addPackageJsonDependency(host, {
+        type: NodeDependencyType.Default,
+        name: '@azure/functions',
+        version: '^1.2.0',
+        overwrite: true
+      });
+      /*
+      if (options.includeApollo) {
+        addPackageJsonDependency(host, {
+          type: NodeDependencyType.Default,
+          name: 'apollo-server-azure-functions',
+          version: '^2.19.0',
+          overwrite: true
+        });
+      }*/
+      addPackageJsonDependency(host, {
+        type: NodeDependencyType.Dev,
+        name: 'copyfiles',
+        version: '^2.4.0',
+        overwrite: true
+      });
+      const pkgPath = '/package.json';
+      let buffer = host.read(pkgPath);
+      if (buffer === null) {
+        throw new SchematicsException('Could not find package.json');
+      }
+
+      const pkg = JSON.parse(buffer.toString());
+      pkg.scripts[
+        `${options.projectDirectory}-${options.projectName}:serve`
+      ] = `nx run ${options.projectDirectory}-${options.projectName}:serve`;
+      pkg.scripts[
+        `${options.projectDirectory}-${options.projectName}:build`
+      ] = `nx run ${options.projectDirectory}-${options.projectName}:build`;
+      pkg.scripts[
+        `${options.projectDirectory}-${options.projectName}:build:deploy`
+      ] = `yarn run ${options.projectDirectory}:build && yarn run artifact:build ${options.projectDirectory}-${options.projectName}`;
+      pkg.scripts[
+        `${options.projectDirectory}-${options.projectName}:copy:localsettings`
+      ] = `copyfiles -f ./apps/${options.projectDirectory}/${options.projectName}/src/app/local.settings.json ./dist/apps/${options.projectDirectory}/${options.projectName}/`;
+
+      host.overwrite(pkgPath, JSON.stringify(pkg, null, 2));
+
+      //Update `.vscode/extensions.json`
+      const extensionsPath = '/.vscode/extensions.json';
+      buffer = host.read(extensionsPath);
+      if (buffer === null) {
+        throw new SchematicsException(
+          'Could not find /.vscode/extensions.json'
+        );
+      }
+      const extensions = JSON.parse(buffer.toString());
+      const recommendations: string[] = extensions['recommendations'];
+      const azureRecommendation = 'ms-azuretools.vscode-azurefunctions';
+      if (!recommendations.includes(azureRecommendation)) {
+        recommendations.push(azureRecommendation);
+      }
+      extensions['recommendations'] = recommendations;
+      host.overwrite(extensionsPath, JSON.stringify(extensions, null, 2));
+
+      //Update /.vscode/settings.json
+      const settingsPath = '/.vscode/settings.json';
+      buffer = host.read(settingsPath);
+      if (buffer === null) {
+        throw new SchematicsException('Could not find /.vscode/settings.json');
+      }
+      const settings = JSON.parse(buffer.toString());
+      settings['azureFunctions.projectLanguage'] = 'TypeScript';
+      settings['azureFunctions.projectRuntime'] = '~3';
+      settings['debug.internalConsoleOptions'] = 'neverOpen';
+      host.overwrite(settingsPath, JSON.stringify(settings, null, 2));
+      //Update /.vscode/tasks.json
+      const tasksPath = '/.vscode/tasks.json';
+      buffer = host.read(tasksPath);
+      if (buffer === null) {
+        throw new SchematicsException('Could not find /.vscode/tasks.json');
+      }
+      const tasks = parse(buffer.toString());
+      (tasks.tasks as [unknown]).push(
+        {
+          type: 'func',
+          command: 'host start',
+          label: `${options.projectDirectory}-${options.projectName} host start`,
+          problemMatcher: '$func-node-watch',
+          isBackground: true,
+          dependsOn: `copy ${options.projectDirectory}-${options.projectName} local.settings.json`,
+          options: {
+            cwd:
+              '${workspaceFolder}/dist/apps/' +
+              options.projectDirectory +
+              '/' +
+              options.projectName
+          }
+        },
+        {
+          type: 'shell',
+          label: `copy ${options.projectDirectory}-${options.projectName} local.settings.json`,
+          command: `yarn run ${options.projectDirectory}-${options.projectName}:copy:localsettings`,
+          dependsOn: `${options.projectDirectory}-${options.projectName}:build`
+        },
+        {
+          type: 'shell',
+          label: `${options.projectDirectory}-${options.projectName}:build`,
+          command: `yarn run ${options.projectDirectory}-${options.projectName}:build`,
+          problemMatcher: [],
+          group: {
+            kind: 'build',
+            isDefault: true
+          }
+        }
+      );
+      host.overwrite(tasksPath, stringify(tasks, null, 2));
+      //Update /.vscode/launch.json
+      const launchPath = '/.vscode/launch.json';
+      buffer = host.read(launchPath);
+      if (buffer === null) {
+        throw new SchematicsException('Could not find /.vscode/launch.json');
+      }
+      const launch = JSON.parse(buffer.toString());
+      launch.configurations.push({
+        name: `${options.projectDirectory}-${options.projectName}`,
+        type: 'node',
+        request: 'attach',
+        port: 9229,
+        preLaunchTask: `${options.projectDirectory}-${options.projectName} host start`
+      });
+      host.overwrite(launchPath, JSON.stringify(launch, null, 2));
+
+      return host;
+    };
   }
 
   log(message) {

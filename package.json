@@ -25,27 +25,33 @@
     "dep-graph": "nx dep-graph",
     "help": "nx help",
     "create-e2e": "yarn nx e2e azure-func-e2e",
-    "custom-build-app": "cd tmp/nx-e2e/proj/ && nx build my-app"
+    "custom-build-app": "cd tmp/nx-e2e/proj/ && nx build my-app",
+    "build:azure-func": "nx build azure-func",
+    "pack:azure-func": "yarn run build:azure-func && cd dist/libs/azure-func && del *.tgz && npm pack && cd ../.."
   },
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "comment-json": "^4.1.0"
+  },
   "devDependencies": {
+    "@nrwl/eslint-plugin-nx": "9.2.3",
+    "@nrwl/jest": "9.2.3",
     "@nrwl/nx-plugin": "9.2.3",
     "@nrwl/workspace": "9.2.3",
+    "@schematics/angular": "^11.0.4",
+    "@types/jest": "25.1.4",
     "@types/node": "~8.9.4",
+    "@typescript-eslint/eslint-plugin": "2.19.2",
+    "@typescript-eslint/parser": "2.19.2",
     "dotenv": "6.2.0",
     "eslint": "6.8.0",
+    "eslint-config-prettier": "6.0.0",
+    "jest": "25.2.3",
+    "ng-packagr": "^11.0.3",
     "prettier": "1.19.1",
+    "ts-jest": "25.2.1",
     "ts-node": "~7.0.0",
     "tslint": "~6.0.0",
-    "typescript": "~3.8.3",
-    "@nrwl/eslint-plugin-nx": "9.2.3",
-    "@typescript-eslint/parser": "2.19.2",
-    "@typescript-eslint/eslint-plugin": "2.19.2",
-    "eslint-config-prettier": "6.0.0",
-    "@nrwl/jest": "9.2.3",
-    "jest": "25.2.3",
-    "@types/jest": "25.1.4",
-    "ts-jest": "25.2.1"
+    "typescript": "~3.8.3"
   }
 }

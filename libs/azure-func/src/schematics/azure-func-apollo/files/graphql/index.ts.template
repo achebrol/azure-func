@@ -1,0 +1,74 @@
+import { AzureFunction } from '@azure/functions';
+import {
+  ApolloServer,
+  gql,
+  makeExecutableSchema
+} from 'apollo-server-azure-functions';
+import { applyMiddleware } from 'graphql-middleware';
+import { permissions } from './permissions';
+
+const typeDefs = gql`
+  type Query {
+    queryItems: [Item]
+  }
+  type Mutation {
+    # Save Item
+    saveItem(input: ItemInput): Item
+    # Delete Item
+    deleteItem(input: Int): Boolean
+  }
+
+  type Item {
+    id: Int
+    title: String
+    description: String
+  }
+
+  input ItemInput {
+    title: String
+    description: String
+  }
+`;
+
+// Provide resolver functions for your schema fields
+const resolvers = {
+  Query: {
+    queryItems: () => [
+      { id: 1, title: 'Item 1', description: 'Item 1 Description' },
+      { id: 2, title: 'Item 2', description: 'Item 2 Description' },
+      { id: 3, title: 'Item 3', description: 'Item 3 Description' }
+    ]
+  },
+  Mutation: {
+    saveItem: () => {
+      return { id: 4, title: 'Item 3', description: 'Item 3 Description' };
+    },
+    deleteItem: () => true
+  }
+};
+
+const server = new ApolloServer({
+  schema: applyMiddleware(
+    makeExecutableSchema({
+      typeDefs: typeDefs,
+      resolvers: resolvers
+    }),
+    permissions
+  ),
+  context: () => {
+    return ctx => {
+      if (!ctx?.req?.headers?.authorization) {
+        return ctx;
+      }
+      const authorizationHeader: string = ctx.req.headers.authorization;
+      const token = authorizationHeader.replace(/bearer /gi, '');
+      const decoded = decode(token, { json: true, complete: true });
+      if (!decoded) {
+        throw new Error('Invalid Authorization bearer token.');
+      }
+      ctx.user = decoded.payload;
+      return ctx;
+    };
+  }
+});
+export const graphqlHandler: AzureFunction = server.createHandler();
