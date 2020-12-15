@@ -1,8 +1,8 @@
-import { Architect } from "@angular-devkit/architect";
-import { TestingArchitectHost } from "@angular-devkit/architect/testing";
-import { schema } from "@angular-devkit/core";
-import { join } from "path";
-import { Options } from "./schema";
+import { Architect } from '@angular-devkit/architect';
+import { TestingArchitectHost } from '@angular-devkit/architect/testing';
+import { schema } from '@angular-devkit/core';
+import { join } from 'path';
+import { Options } from './schema';
 
 // const options: Options = {};
 
@@ -25,7 +25,7 @@ import { Options } from "./schema";
 //   it("can run", async () => {
 //     // A "run" can have multiple outputs, and contains progress information.
 //     const run = await architect.scheduleBuilder(
-//       "@coinsy/gcp-function:build",
+//       "@coinsy/azure-func:build",
 //       options
 //     );
 //     // The "result" member (of type BuilderOutput) is the next output.

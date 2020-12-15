@@ -4,21 +4,25 @@ import {
   readJson,
   runNxCommandAsync,
   uniq
-} from "@nrwl/nx-plugin/testing";
+} from '@nrwl/nx-plugin/testing';
 
-describe("gcp-function e2e", () => {
-  it("should create gcp-function", async done => {
-    const pluginHttp = "http-service";
-    const pluginPubsub = "pubsub-service";
+describe('azure-func e2e', () => {
+  it('should create azure-func', async done => {
+    const pluginHttp = 'http-service';
+    const pluginPubsub = 'pubsub-service';
     // const lib = "my-lib";
     // const lib2 = "my-lib2";
-    ensureNxProject("@joelcode/gcp-function", "dist/libs/gcp-function");
+    ensureNxProject('@joelcode/azure-func', 'dist/libs/azure-func');
 
     await Promise.all([
       // await runNxCommandAsync(`generate @nrwl/node:lib ${lib}  --buildable`),
       // await runNxCommandAsync(`generate @nrwl/node:lib ${lib2}  --buildable`),
-      await runNxCommandAsync(`generate @joelcode/gcp-function:http ${pluginHttp}`),
-      await runNxCommandAsync(`generate @joelcode/gcp-function:pubsub ${pluginPubsub}`)
+      await runNxCommandAsync(
+        `generate @joelcode/azure-func:http ${pluginHttp}`
+      ),
+      await runNxCommandAsync(
+        `generate @joelcode/azure-func:pubsub ${pluginPubsub}`
+      )
     ]);
 
     await Promise.all([
@@ -38,15 +42,15 @@ describe("gcp-function e2e", () => {
     done();
   }, 60000);
 
-  describe.skip("--tags", () => {
-    it("should add tags to nx.json", async done => {
-      const plugin = uniq("gcp-function");
-      ensureNxProject("@joelcode/gcp-function", "dist/libs/gcp-function");
+  describe.skip('--tags', () => {
+    it('should add tags to nx.json', async done => {
+      const plugin = uniq('azure-func');
+      ensureNxProject('@joelcode/azure-func', 'dist/libs/azure-func');
       await runNxCommandAsync(
-        `generate @joelcode/gcp-function:gcpFunction ${plugin} --tags e2etag,e2ePackage`
+        `generate @joelcode/azure-func:gcpFunction ${plugin} --tags e2etag,e2ePackage`
       );
-      const nxJson = readJson("nx.json");
-      expect(nxJson.projects[plugin].tags).toEqual(["e2etag", "e2ePackage"]);
+      const nxJson = readJson('nx.json');
+      expect(nxJson.projects[plugin].tags).toEqual(['e2etag', 'e2ePackage']);
       done();
     });
   });

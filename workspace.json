@@ -1,9 +1,9 @@
 {
   "version": 1,
   "projects": {
-    "gcp-function": {
-      "root": "libs/gcp-function",
-      "sourceRoot": "libs/gcp-function/src",
+    "azure-func": {
+      "root": "libs/azure-func",
+      "sourceRoot": "libs/azure-func/src",
       "projectType": "library",
       "schematics": {},
       "architect": {
@@ -11,43 +11,43 @@
           "builder": "@nrwl/linter:lint",
           "options": {
             "linter": "eslint",
-            "config": "libs/gcp-function/.eslintrc",
+            "config": "libs/azure-func/.eslintrc",
             "tsConfig": [
-              "libs/gcp-function/tsconfig.lib.json",
-              "libs/gcp-function/tsconfig.spec.json"
+              "libs/azure-func/tsconfig.lib.json",
+              "libs/azure-func/tsconfig.spec.json"
             ],
-            "exclude": ["**/node_modules/**", "!libs/gcp-function/**"]
+            "exclude": ["**/node_modules/**", "!libs/azure-func/**"]
           }
         },
         "test": {
           "builder": "@nrwl/jest:jest",
           "options": {
-            "jestConfig": "libs/gcp-function/jest.config.js",
-            "tsConfig": "libs/gcp-function/tsconfig.spec.json",
+            "jestConfig": "libs/azure-func/jest.config.js",
+            "tsConfig": "libs/azure-func/tsconfig.spec.json",
             "passWithNoTests": true
           }
         },
         "build": {
           "builder": "@nrwl/node:package",
           "options": {
-            "outputPath": "dist/libs/gcp-function",
-            "tsConfig": "libs/gcp-function/tsconfig.lib.json",
-            "packageJson": "libs/gcp-function/package.json",
-            "main": "libs/gcp-function/src/index.ts",
+            "outputPath": "dist/libs/azure-func",
+            "tsConfig": "libs/azure-func/tsconfig.lib.json",
+            "packageJson": "libs/azure-func/package.json",
+            "main": "libs/azure-func/src/index.ts",
             "assets": [
-              "libs/gcp-function/*.md",
+              "libs/azure-func/*.md",
               {
-                "input": "./libs/gcp-function/src",
+                "input": "./libs/azure-func/src",
                 "glob": "**/*.!(ts)",
                 "output": "./src"
               },
               {
-                "input": "./libs/gcp-function",
+                "input": "./libs/azure-func",
                 "glob": "collection.json",
                 "output": "."
               },
               {
-                "input": "./libs/gcp-function",
+                "input": "./libs/azure-func",
                 "glob": "builders.json",
                 "output": "."
               }
@@ -56,19 +56,19 @@
         }
       }
     },
-    "gcp-function-e2e": {
+    "azure-func-e2e": {
       "projectType": "application",
-      "root": "apps\\gcp-function-e2e",
-      "sourceRoot": "apps\\gcp-function-e2e/src",
+      "root": "apps\\azure-func-e2e",
+      "sourceRoot": "apps\\azure-func-e2e/src",
       "architect": {
         "e2e": {
           "builder": "@nrwl/nx-plugin:e2e",
           "options": {
-            "target": "gcp-function:build",
-            "npmPackageName": "@joelcode/gcp-function",
-            "pluginOutputPath": "dist/libs/gcp-function",
-            "jestConfig": "apps/gcp-function-e2e/jest.config.js",
-            "tsSpecConfig": "apps/gcp-function-e2e/tsconfig.spec.json"
+            "target": "azure-func:build",
+            "npmPackageName": "@joelcode/azure-func",
+            "pluginOutputPath": "dist/libs/azure-func",
+            "jestConfig": "apps/azure-func-e2e/jest.config.js",
+            "tsSpecConfig": "apps/azure-func-e2e/tsconfig.spec.json"
           }
         }
       }

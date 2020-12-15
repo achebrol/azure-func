@@ -1,5 +1,5 @@
 {
-  "npmScope": "joelcode",
+  "npmScope": "techops",
   "implicitDependencies": {
     "workspace.json": "*",
     "package.json": {
@@ -19,12 +19,12 @@
     }
   },
   "projects": {
-    "gcp-function": {
+    "azure-func": {
       "tags": []
     },
-    "gcp-function-e2e": {
+    "azure-func-e2e": {
       "tags": [],
-      "implicitDependencies": ["gcp-function"]
+      "implicitDependencies": ["azure-func"]
     }
   }
 }

@@ -37,4 +37,4 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
-/libs/gcp-function/node_modules/
+/libs/azure-func/node_modules/

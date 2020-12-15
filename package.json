@@ -1,5 +1,5 @@
 {
-  "name": "joelcode",
+  "name": "techops",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
@@ -24,7 +24,7 @@
     "workspace-schematic": "nx workspace-schematic",
     "dep-graph": "nx dep-graph",
     "help": "nx help",
-    "create-e2e": "yarn nx e2e gcp-function-e2e",
+    "create-e2e": "yarn nx e2e azure-func-e2e",
     "custom-build-app": "cd tmp/nx-e2e/proj/ && nx build my-app"
   },
   "private": true,

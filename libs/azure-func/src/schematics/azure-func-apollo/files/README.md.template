@@ -1,15 +1,15 @@
-# <%= name %> HTTP Google Cloud Function
+# <%= name %> Pub/Sub Google Cloud Function
 **Describe your awesome function here!**
 
 <div align="center">
-  <img src="https://github.com/JoelCode/gcp-function/blob/master/http-function-structure.png?raw=true" width="300">
+  <img src="https://github.com/JoelCode/azure-func/blob/master/http-function-structure.png?raw=true" width="300">
   <p>HTTP Function Structure</p>
 </div>
 
 <details>
-<summary>What is @joelcode/gcp-function plugin?</summary>
-@joelcode/gcp-function plugin is a set of extensible dev tools for Google Cloud Function within an Nx workspace.
-* Create : `nx generate @joelcode/gcp-function:http functionName`
+<summary>What is @joelcode/azure-func plugin?</summary>
+@joelcode/azure-func plugin is a set of extensible dev tools for Google Cloud Function within an Nx workspace.
+* Create : `nx generate @joelcode/azure-func:http functionName`
 * Serve  : `nx serve functionName`
 * Test   : `nx test functionName`
 * Deploy : `nx deploy functionName`
@@ -48,7 +48,6 @@ It has first-class support for many frontend and backend technologies, so its do
     Read more about [Google Cloud Platform Authentication](https://cloud.google.com/docs/authentication#projects_and_resources).
 
 ## Test the function
-    nx serve <%= name %>
     nx test <%= name %>
 
 ## Deploy the function

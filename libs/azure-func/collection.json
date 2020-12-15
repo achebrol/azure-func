@@ -1,0 +1,17 @@
+{
+  "$schema": "../../node_modules/@angular-devkit/schematics/collection-schema.json",
+  "name": "azure-func",
+  "version": "0.0.1",
+  "schematics": {
+    "http": {
+      "schema": "./src/schematics/azure-func-http/schema.json",
+      "factory": "./src/schematics/azure-func-http/schematic",
+      "description": "Template for the creation of Azure FunctionApp with HTTP triggers"
+    },
+    "apollo": {
+      "schema": "./src/schematics/azure-func-apollo/schema.json",
+      "factory": "./src/schematics/azure-func-apollo/schematic",
+      "description": "Template for the creation of Apollo GraphQL Gateway as an Azure FunctionApp"
+    }
+  }
+}

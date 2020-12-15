@@ -1,18 +1,18 @@
-# Google Cloud Functions Generator
-Generate a Google Cloud Function within a Nx workspace with dev tools: 
-* Create : `nx generate @joelcode/gcp-function:http functionName`                       
+# Azure Cloud Functions Generator
+Generate a Azure Function App within a Nx workspace with dev tools: 
+* Create : `nx generate @techops/azure-func:http functionName`                       
 * Serve  : `nx serve functionName`                
 * Test   : `nx test functionName`      
 * Deploy : `nx deploy functionName`       
 
 <details>
-<summary>What is a Google Cloud Functions?</summary>
-Cloud Functions is a serverless execution environment for building and 
-connecting cloud services. With Cloud Functions you write simple, single-purpose 
+<summary>What is a Azure FunctionApp?</summary>
+Azure FunctionApp is a serverless execution environment for building and 
+connecting cloud services. With FunctionApp you write simple, single-purpose 
 functions that are attached to events emitted from your cloud infrastructure and 
 services. Your function is triggered when an event being watched is fired.
 
-* [Learn how to write a function from scratch.](https://cloud.google.com/functions/docs/first-nodejs)
+* [Learn how to write a function app from scratch.](https://docs.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-typescript)
 </details>
 
 <details>
@@ -28,34 +28,26 @@ It has first-class support for many frontend and backend technologies, so its do
 ### Before you begin
 1. Install [Node.js version 10 or greater](https://nodejs.org/)
 
-1. Obtain authentication credentials.
-    Create local credentials by running the following command and following the
-    oauth2 flow (read more about the command [here](https://cloud.google.com/sdk/gcloud/reference/beta/auth/application-default/login)):
-
-        gcloud auth application-default login
-
-    Read more about [Google Cloud Platform Authentication](https://cloud.google.com/docs/authentication#projects_and_resources).
-
 1. Create a Nx workspace.
 
 		npx create-nx-workspace@latest workspaceName
 		cd workspaceName
 		yarn add tslib
-		yarn add -D @joelcode/gcp-function @google-cloud/functions-framework supertest @nrwl/lint @nrwl/jest @types/express
+		yarn add -D @techops/azure-func
 		
     Read more about [Nx Workspace](https://nx.dev/angular)
     
 ## Create a function
 
 <div align="center">
-<img src="https://github.com/JoelCode/gcp-function/blob/master/http-function-structure.png?raw=true" width="300">
+<img src="https://github.com/JoelCode/azure-func/blob/master/http-function-structure.png?raw=true" width="300">
 <p>HTTP Function Structure</p>
 </div>
 
 ### Trigger: HTTP
-    nx generate @joelcode/gcp-function:http functionName
-### Trigger: Pub/Sub
-    nx generate @joelcode/gcp-function:pubsub functionName
+    nx generate @techops/azure-func:http functionName
+### Trigger: HTTP with Apollo GraphQL Gateway
+    nx generate @techops/azure-func:apollo functionName
 ## Test the function
     nx serve functionName
     nx test functionName
@@ -68,8 +60,8 @@ It has first-class support for many frontend and backend technologies, so its do
 
 ## App Composition
 <div align="center">
-<img src="https://github.com/JoelCode/gcp-function/blob/master/nx-dev-flow.png?raw=true" width="900">
-<p>Add Microservice (Google Cloud Functions) to NX</p>
+<img src="https://github.com/JoelCode/azure-func/blob/master/nx-dev-flow.png?raw=true" width="900">
+<p>Add Microservice (Azure FunctionApp) to NX</p>
 </div>
 
 ## Others

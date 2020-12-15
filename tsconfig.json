@@ -16,7 +16,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@joelcode/gcp-function": ["libs/gcp-function/src/index.ts"]
+      "@techops/azure-func": ["libs/azure-func/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
