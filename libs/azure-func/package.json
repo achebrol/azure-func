@@ -11,9 +11,10 @@
   "schematics": "./collection.json",
   "builders": "./builders.json",
   "peerDependencies": {},
-  "dependencies": {
+  "devDependencies": {
     "@nrwl/workspace": "*",
     "@schematics/angular": "*",
-    "comment-json": "*"
+    "comment-json": "*",
+    "@nrwl/node": "*"
   }
 }
