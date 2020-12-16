@@ -14,19 +14,14 @@ import {
 } from '@angular-devkit/schematics';
 
 export default function generateFiles(options: Options): Rule {
-  return (tree: Tree, context: SchematicContext) => {
-    const templateSource = apply(url('./files'), [
+  return mergeWith(
+    apply(url(`./files`), [
       applyTemplates({
         ...options,
         ...names(options.name),
         offsetFromRoot: offsetFromRoot(options.projectRoot)
       }),
-      move(options.projectRoot)
-    ]);
-
-    return chain([mergeWith(templateSource, MergeStrategy.Overwrite)])(
-      tree,
-      context
-    );
-  };
+      move(`${options.projectRoot}/${options.projectName}/src/app`)
+    ])
+  );
 }

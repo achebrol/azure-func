@@ -127,8 +127,7 @@ export default class ProjectTools {
       builder: '@nrwl/node:build',
       options: {
         outputPath: join(normalize('dist'), options.appProjectRoot),
-        main: join(project.sourceRoot, 'index.ts'),
-        yamlConfig: join(project.sourceRoot, '/environments/.production.yaml'),
+        main: join(project.sourceRoot, 'main.ts'),
         tsConfig: join(options.appProjectRoot, 'tsconfig.app.json'),
         packageJson: join(options.appProjectRoot, 'package.json'),
         assets: [
@@ -248,7 +247,7 @@ export default class ProjectTools {
       addPackageJsonDependency(host, {
         type: NodeDependencyType.Dev,
         name: 'copyfiles',
-        version: '^2.4.0',
+        version: '*',
         overwrite: true
       });
       const pkgPath = '/package.json';
