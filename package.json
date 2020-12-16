@@ -28,14 +28,15 @@
     "create-e2e": "yarn nx e2e azure-func-e2e",
     "custom-build-app": "cd tmp/nx-e2e/proj/ && nx build my-app",
     "build:azure-func": "nx build azure-func",
-    "pack:azure-func": "yarn run build:azure-func && cd dist/libs/azure-func && del *.tgz && npm pack && cd ../.."
+    "pack:azure-func": "yarn run build:azure-func && cd dist/libs/azure-func && del *.tgz && npm pack && cd ../..",
+    "gen:packageJson": "ts-node --skip-project ./tools/app-package-json.ts --app=my-func-api"
   },
   "private": true,
   "dependencies": {},
   "devDependencies": {
-    "comment-json": "^4.1.0",
     "@nrwl/eslint-plugin-nx": "9.2.3",
     "@nrwl/jest": "9.2.3",
+    "@nrwl/node": "9.2.3",
     "@nrwl/nx-plugin": "9.2.3",
     "@nrwl/workspace": "9.2.3",
     "@schematics/angular": "^11.0.4",
@@ -43,6 +44,9 @@
     "@types/node": "~8.9.4",
     "@typescript-eslint/eslint-plugin": "2.19.2",
     "@typescript-eslint/parser": "2.19.2",
+    "chalk": "^4.1.0",
+    "comment-json": "^4.1.0",
+    "copyfiles": "*",
     "dotenv": "6.2.0",
     "eslint": "6.8.0",
     "eslint-config-prettier": "6.0.0",
