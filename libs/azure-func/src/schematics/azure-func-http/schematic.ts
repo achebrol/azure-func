@@ -5,12 +5,21 @@ import {
   SchematicContext,
   Tree
 } from '@angular-devkit/schematics';
-import { addPackageWithInit, formatFiles } from '@nrwl/workspace';
-import { UserOptions } from '../schema';
+import { formatFiles } from '@nrwl/workspace';
+import { Options, UserOptions } from '../schema';
 import ProjectTools from '../utilities/projectTools';
 import generateFiles from '../utilities/generateFiles';
 import updateNxJson from '../utilities/updateNxJson';
 
+function updateMain(options: Options): Rule {
+  return (host: Tree) => {
+    const mainPath = `/${options.projectRoot}/${options.projectName}/src/main.ts`;
+    const content = [];
+    content.push(`export * from './app/http-trigger/index';`);
+    host.overwrite(mainPath, content.join('\n'));
+    return host;
+  };
+}
 // noinspection JSUnusedGlobalSymbols
 export default function(_UserOptions: UserOptions): Rule {
   return (tree: Tree, context: SchematicContext) => {
@@ -24,7 +33,7 @@ export default function(_UserOptions: UserOptions): Rule {
         name: options.projectName,
         directory: options.projectDirectory,
         skipFormat: true,
-        skipPackageJson: false,
+        skipPackageJson: true,
 
         tags: options.name,
         unitTestRunner: 'jest'
@@ -35,7 +44,9 @@ export default function(_UserOptions: UserOptions): Rule {
       updateNxJson(options),
       tools.updateWorkspaceJson(options),
       tools.addDependenciesAndScripts(options),
-      formatFiles(options)
+      updateMain(options),
+      formatFiles(options),
+      tools.installPackages()
     ])(tree, context);
   };
 }

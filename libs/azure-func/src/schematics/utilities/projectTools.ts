@@ -1,7 +1,12 @@
 import { Options, UserOptions } from '../schema';
 import { join, normalize } from '@angular-devkit/core';
 import { inspect } from 'util';
-import { Rule, SchematicsException, Tree } from '@angular-devkit/schematics';
+import {
+  Rule,
+  SchematicContext,
+  SchematicsException,
+  Tree
+} from '@angular-devkit/schematics';
 import {
   addPackageJsonDependency,
   NodeDependencyType
@@ -18,6 +23,7 @@ import {
   updateWorkspaceInTree
 } from '@nrwl/workspace';
 import { parse, stringify } from 'comment-json';
+import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
 
 export default class ProjectTools {
   userOptions: UserOptions;
@@ -270,11 +276,11 @@ export default class ProjectTools {
       pkg.scripts[
         `${projectFullName}:build:deploy`
       ] = `yarn run ${projectFullName}:build && yarn run artifact:build ${projectFullName}`;
-      pkg.scripts[`${projectFullName}:copy:localsettings`] = `copyfiles -f ${
-        options.projectRoot
-      }/${options.projectName}/src/app/local.settings.json ./dist/apps/${
-        options.projectDirectory ? options.projectDirectory + '/' : ''
-      }${options.projectName}/`;
+      pkg.scripts[
+        `${projectFullName}:copy:localsettings`
+      ] = options.projectDirectory
+        ? `copyfiles -f ./apps/${options.projectDirectory}/${options.projectName}/src/app/local.settings.json ./dist/apps/${options.projectDirectory}/${options.projectName}/`
+        : `copyfiles -f ./apps/${options.projectName}/src/app/local.settings.json ./dist/apps/${options.projectName}/`;
 
       host.overwrite(pkgPath, JSON.stringify(pkg, null, 2));
 
@@ -327,27 +333,30 @@ export default class ProjectTools {
         {
           type: 'func',
           command: 'host start',
-          label: `${options.projectDirectory}-${options.projectName} host start`,
+          label: options.projectDirectory
+            ? `${options.projectDirectory}-${options.projectName} host start`
+            : `${options.projectName} host start`,
           problemMatcher: '$func-node-watch',
           isBackground: true,
           dependsOn: `copy ${projectFullName} local.settings.json`,
           options: {
             cwd:
-              '${workspaceFolder}/dist/apps/' + options.projectDirectory
+              '${workspaceFolder}/dist/apps/' +
+              (options.projectDirectory
                 ? options.projectDirectory + '/' + options.projectName
-                : options.projectName
+                : options.projectName)
           }
         },
         {
-          type: 'shell',
+          type: 'npm',
           label: `copy ${projectFullName} local.settings.json`,
-          command: `yarn run ${projectFullName}:copy:localsettings`,
+          script: `${projectFullName}:copy:localsettings`,
           dependsOn: `${projectFullName}:build`
         },
         {
-          type: 'shell',
+          type: 'npm',
           label: `${projectFullName}:build`,
-          command: `yarn run ${projectFullName}:build`,
+          script: `${projectFullName}:build`,
           problemMatcher: [],
           group: {
             kind: 'build',
@@ -383,7 +392,13 @@ export default class ProjectTools {
       return host;
     };
   }
-
+  installPackages(): Rule {
+    return (tree: Tree, context: SchematicContext) => {
+      // Install the dependency
+      context.addTask(new NodePackageInstallTask());
+      return tree;
+    };
+  }
   log(message) {
     this.context.logger.info(inspect(message, false, null));
   }

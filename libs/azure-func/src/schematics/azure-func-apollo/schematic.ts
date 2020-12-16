@@ -6,10 +6,21 @@ import {
   Tree
 } from '@angular-devkit/schematics';
 import { formatFiles } from '@nrwl/workspace';
-import { UserOptions } from '../schema';
+import { Options, UserOptions } from '../schema';
 import ProjectTools from '../utilities/projectTools';
 import generateFiles from '../utilities/generateFiles';
 import updateNxJson from '../utilities/updateNxJson';
+import { NodePackageInstallTask } from '@angular-devkit/schematics/tasks';
+
+function updateMain(options: Options): Rule {
+  return (host: Tree) => {
+    const mainPath = `/${options.projectRoot}/${options.projectName}/src/main.ts`;
+    const content = [];
+    content.push(`export * from './app/graphql/index';`);
+    host.overwrite(mainPath, content.join('\n'));
+    return host;
+  };
+}
 
 // noinspection JSUnusedGlobalSymbols
 export default function(_UserOptions: UserOptions): Rule {
@@ -34,10 +45,12 @@ export default function(_UserOptions: UserOptions): Rule {
       //addPackageWithInit('graphql-shield'),
       //addPackageWithInit('jsonwebtoken'),
       //addPackageWithInit('copyfiles'),
-      formatFiles(options),
       generateFiles(options),
       updateNxJson(options),
-      tools.updateWorkspaceJson(options)
+      tools.updateWorkspaceJson(options),
+      updateMain(options),
+      formatFiles(options),
+      tools.installPackages()
     ])(tree, context);
   };
 }
