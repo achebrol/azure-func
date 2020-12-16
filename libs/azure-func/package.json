@@ -11,6 +11,9 @@
   "schematics": "./collection.json",
   "builders": "./builders.json",
   "peerDependencies": {},
+  "scripts": {
+    "postinstall": "node ./tools/post-install.js"
+  },
   "dependencies": {
     "@nrwl/workspace": "*",
     "@schematics/angular": "*",

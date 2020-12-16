@@ -9,14 +9,14 @@ export function writePackageJson(projectName: string) {
   if (projectName) {
     try {
       const workspace = readWorkspaceJson();
-      const { architect, projectType } = workspace.projects[projectName];
+      const { targets, projectType } = workspace.projects[projectName];
 
       if (projectType === 'application') {
-        const { outputPath } = architect.build.options;
+        const { outputPath } = targets.build.options;
 
         try {
           const { npmScope } = readNxJson();
-          const { peerDependencies } = architect.build.options;
+          const { peerDependencies } = targets.build.options;
           const [workspaceVersion, dependencies] = inferProjectDependencies(
             outputPath,
             peerDependencies
@@ -119,6 +119,6 @@ function writeProjectPackageJson(
     console.error(`Unable to write to {yellow ${path}}: ${error}`);
   }
 }
-if (yargs.argv.app) {
-  writePackageJson(yargs.argv.app as string);
+if (yargs.argv._[0]) {
+  writePackageJson(yargs.argv._[0] as string);
 }

@@ -274,8 +274,11 @@ export default class ProjectTools {
         `${projectFullName}:build`
       ] = `nx run ${projectFullName}:build`;
       pkg.scripts[
+        `generate:package:json`
+      ] = `ts-node --project=./tools/tsconfig.tools.json ./tools/app-package-json.ts`;
+      pkg.scripts[
         `${projectFullName}:build:deploy`
-      ] = `yarn run ${projectFullName}:build && yarn run artifact:build ${projectFullName}`;
+      ] = `yarn run ${projectFullName}:build && yarn run generate:package:json ${projectFullName}`;
       pkg.scripts[
         `${projectFullName}:copy:localsettings`
       ] = options.projectDirectory
