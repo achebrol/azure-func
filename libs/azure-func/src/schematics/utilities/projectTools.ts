@@ -43,11 +43,13 @@ export default class ProjectTools {
   normalizeOptions(userOptions: UserOptions): Options {
     const linter = userOptions.linter || Linter.EsLint;
     const projectType = ProjectType.Application;
-    //const name = toFileName(userOptions.name);
+    const name = toFileName(userOptions.name);
     const projectDirectory = userOptions.directory || '';
     // ? `${toFileName(userOptions.directory)}/${name}`
     // : name;
-    const projectName = projectDirectory.replace(new RegExp('/', 'g'), '-');
+    const projectName = userOptions.directory
+      ? projectDirectory.replace(new RegExp('/', 'g'), '-')
+      : name;
     const projectRoot = `${projectRootDir(projectType)}/${projectDirectory}`;
     const parsedTags = userOptions.tags
       ? userOptions.tags.split(',').map(s => s.trim())
